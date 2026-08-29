@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Kards 单位/指令/反制卡定制工具</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  body { font-family: sans-serif; display: flex; gap: 30px; padding: 20px; background: #f0f0f0; }
+  #controls { width: 300px; display: flex; flex-direction: column; gap: 10px; }
+  #controls label { font-weight: bold; margin-top: 10px; }
+  #controls input, #controls select, #controls textarea { padding: 8px; }
+  
+  .btn { padding: 10px; background: #333; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; border-radius: 4px; }
+  .btn:hover { background: #555; }
+  
+  #card-preview {
+    width: 350px; height: 490px;
+    border: 8px solid #333;
+    background: #e8e0d0; 
+    position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    font-family: 'Arial Black', sans-serif;
+  }
+
+  /* 图片区域 */
+  #card-img { 
+    width: 100%; 
+    height: 60%; 
+    object-fit: cover; 
+    border-bottom: 2px solid #333; 
+    background: gray; 
+    margin-bottom: -15px;
+    position: relative;
+    z-index: 1; 
+  }
+  
+  .britain { background: #c41e3a; }
+  .germany { background: #4a4a4a; }
+  .usa { background: #3b5b92; }
+  .ussr { background: #8b0000; }
+  .japan { background: #dcdcdc; }
+  
+  /* 费用区 */
+  #cost-box { 
+    position: absolute; top: 5px; left: 5px; 
+    background: #111; color: white; 
+    padding: 4px 6px 10px 6px; 
+    z-index: 10; border: 1px solid #555; 
+    display: flex; align-items: center;
+  }
+  #cost-display { font-size: 30px; font-weight: bold; line-height: 34px; }
+  #cost-stack { display: flex; flex-direction: column; margin-left: 2px; }
+  #cost-stack span.k { color: #d4af37; font-size: 14px; line-height: 12px; font-weight: bold; }
+  #action-display { font-size: 12px; line-height: 12px; font-weight: bold; color: white; display: none; }
+  
+  /* 阵营图标 */
+  #nation-icon { 
+    position: absolute; top: 5px; right: 5px; 
+    width: 45px; height: 45px; 
+    background: transparent; 
+    border: none; 
+    border-radius: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 10;
+  }
+  
+  .nation-svg { width: 45px; height: 45px; display: none; }
+  .nation-svg.active { display: block; }
+
+  #text-area { 
+    padding: 10px; 
+    text-align: center; 
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+    margin-top: -15px;
+    position: relative;
+    z-index: 2;
+    padding-top: 20px; 
+  }
+  
+  /* 图标容器：黑方块完美骑在画框底线上 */
+  #icon-area { 
+    display: flex; justify-content: center; align-items: center; 
+    margin: 0 auto; 
+    min-height: 50px; 
+    margin-top: -10px; /* 让黑方块中心对齐底边框线 */
+  }
+  
+  #icon-order, #icon-counter { background: #111; color: white; font-size: 24px; font-weight: bold; width: 30px; height: 30px; text-align: center; line-height: 30px; }
+  #unit-icon-area { display: flex; justify-content: center; align-items: center; gap: 4px; }
+  #unit-emoji { font-size: 28px; background: #111; color: white; padding: 2px 8px; border-radius: 4px; display: flex; align-items: center; justify-content: center; height: 40px; }
+  .unit-stat { background: #111; color: white; font-weight: 900; font-size: 20px; padding: 5px 10px; width: 30px; height: 40px; display: flex; justify-content: center; align-items: center; }
+
+  .half-up { border-radius: 50% 50% 0 0; }
+  .half-down { border-radius: 0 0 50% 50%; }
+  .round-up { border-radius: 50%; }
+
+  #card-name { font-size: 24px; font-weight: 900; text-transform: uppercase; margin: 10px 0 5px; letter-spacing: 1px; }
+  #card-tag { font-size: 14px; font-style: italic; color: #444; margin-bottom: 5px; white-space: pre-wrap; word-wrap: break-word; text-align: center; }
+  #card-text { font-family: sans-serif; font-size: 16px; line-height: 1.3; text-align: center; margin-top: 10px; min-height: 50px; max-height: 90px; overflow: hidden; word-wrap: break-word; }
+
+  #rarity-box { display: flex; justify-content: center; gap: 4px; padding: 10px; align-items: center; }
+  .rarity-square { width: 12px; height: 12px; display: inline-block; }
+  .rarity-star { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; line-height: 10px; display: inline-block; font-weight: bold; }
+</style>
+</head>
+<body>
+  
+<div id="controls">
+  <h2>卡牌定制器</h2>
+  
+  <label>卡牌类型 (Type)</label>
+  <select id="card-type" onchange="updateCardType()">
+    <option value="order">指令卡</option>
+    <option value="unit">单位卡</option>
+    <option value="counter">反制卡</option>
+  </select>
+
+  <label>阵营 (Faction)</label>
+  <select id="nation" onchange="updateNation(); updateRarity();">
+    <option value="britain">英国 (Britain)</option>
+    <option value="germany">德国 (Germany)</option>
+    <option value="usa">美国 (USA)</option>
+    <option value="ussr">苏联 (USSR)</option>
+    <option value="japan">日本 (Japan)</option>
+  </select>
+
+  <label>部署费用 (Cost)</label>
+  <input type="number" id="cost" value="1" min="0" max="12" oninput="updateCard()">
+
+  <label>卡名 (Name)</label>
+  <input type="text" id="name" value="一杯茶" oninput="updateCard()">
+
+  <div id="unit-controls" style="display: none;">
+    <label>行动花费 (Action Cost)</label>
+    <input type="number" id="action" value="0" min="0" max="3" oninput="updateCard()">
+
+    <label>兵种 (Unit Type)</label>
+    <select id="unit-type" onchange="updateUnitType()">
+      <option value="infantry">步兵 🚶‍♂️</option>
+      <option value="tank">坦克 🚙</option>
+      <option value="fighter">战斗机 ✈</option>
+      <option value="bomber">轰炸机 💣</option>
+      <option value="artillery">炮兵 🏹</option>
+    </select>
+
+    <label>攻击力 (Attack)</label>
+    <input type="number" id="attack" value="2" min="0" max="9" oninput="updateCard()">
+
+    <label>生命值 (Health)</label>
+    <input type="number" id="health" value="3" min="0" max="9" oninput="updateCard()">
+  </div>
+
+  <label>类型标签 (Tag - 如：闪击，可换行)</label>
+  <textarea id="tag" rows="2" placeholder="可留空" oninput="updateCard()"></textarea>
+
+  <label>效果描述 (Text) <br><small>提示：使用 <b>$b</b> 标记加粗，如：一二三$b四五$b六七</small></label>
+  <textarea id="text" rows="8" oninput="updateCard()">部署：下个友方回合开始时，失去1个指挥点。</textarea>
+
+  <label>卡面图片 URL (Image URL)</label>
+  <input type="text" id="img" placeholder="https://..." oninput="updateCard()">
+  
+  <label>本地导入图片</label>
+  <input type="file" id="imgUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+  <button class="btn" onclick="document.getElementById('imgUpload').click()">选择本地图片</button>
+
+  <label>稀有度 (Rarity)</label>
+  <select id="rarity" onchange="updateRarity()">
+    <option value="iron">铁</option>
+    <option value="copper">铜</option>
+    <option value="silver">银</option>
+    <option value="gold">金</option>
+  </select>
+
+  <button class="btn" onclick="exportCard()">导出高清卡图 (PNG)</button>
+</div>
+
+<div id="card-preview" class="britain">
+  <div id="cost-box">
+    <span id="cost-display">1</span>
+    <div id="cost-stack">
+      <span class="k">K</span>
+      <span id="action-display">0</span>
+    </div>
+  </div>
+  
+  <div id="nation-icon">
+    <svg id="svg-britain" class="nation-svg active" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="#003399" />
+      <circle cx="50" cy="50" r="30" fill="#FFFFFF" />
+      <circle cx="50" cy="50" r="16" fill="#CC0000" />
+    </svg>
+    <svg id="svg-germany" class="nation-svg" viewBox="0 0 100 100">
+      <g transform="rotate(45 50 50)">
+        <polygon points="20,20 40,20 50,30 60,20 80,20 80,40 70,50 80,60 80,80 60,80 50,70 40,80 20,80 20,60 30,50 20,40" fill="#000000" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" />
+      </g>
+    </svg>
+    <svg id="svg-usa" class="nation-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="#003399" />
+      <polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#FFFFFF" />
+    </svg>
+    <svg id="svg-ussr" class="nation-svg" viewBox="0 0 100 100">
+      <polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#cc0000" stroke="#d4af37" stroke-width="4" />
+    </svg>
+    <svg id="svg-japan" class="nation-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="#FFFFFF" />
+      <circle cx="50" cy="50" r="30" fill="#cc0000" />
+    </svg>
+  </div>
+
+  <img id="card-img" src="" alt="卡面">
+  <div id="text-area">
+    <div id="icon-area">
+      <div id="icon-order" style="display:block;">!</div>
+      <div id="icon-counter" style="display:none;">?</div>
+      <div id="unit-icon-area" style="display:none;">
+        <div id="attack-icon" class="unit-stat half-up">2</div>
+        <div id="unit-emoji">🚶‍♂️</div>
+        <div id="health-icon" class="unit-stat half-down">2</div>
+      </div>
+    </div>
+    
+    <div id="card-name">一杯茶</div>
+    <div id="card-tag"></div>
+    <div id="card-text">部署：下个友方回合开始时，失去1个指挥点。</div>
+  </div>
+
+  <div id="rarity-box"></div>
+</div>
+
+<script>
+  const inputEls = {
+    type: document.getElementById('card-type'),
+    nation: document.getElementById('nation'),
+    cost: document.getElementById('cost'),
+    action: document.getElementById('action'),
+    name: document.getElementById('name'),
+    unitType: document.getElementById('unit-type'),
+    attack: document.getElementById('attack'),
+    health: document.getElementById('health'),
+    tag: document.getElementById('tag'),
+    text: document.getElementById('text'),
+    img: document.getElementById('img'),
+    rarity: document.getElementById('rarity')
+  };
+
+  const displayEls = {
+    cardPreview: document.getElementById('card-preview'),
+    costDisplay: document.getElementById('cost-display'),
+    actionDisplay: document.getElementById('action-display'),
+    cardImg: document.getElementById('card-img'),
+    cardName: document.getElementById('card-name'),
+    cardTag: document.getElementById('card-tag'),
+    cardText: document.getElementById('card-text'),
+    rarityBox: document.getElementById('rarity-box'),
+    iconOrder: document.getElementById('icon-order'),
+    iconCounter: document.getElementById('icon-counter'),
+    unitIconArea: document.getElementById('unit-icon-area'),
+    unitEmoji: document.getElementById('unit-emoji'),
+    attackIcon: document.getElementById('attack-icon'),
+    healthIcon: document.getElementById('health-icon'),
+    unitControls: document.getElementById('unit-controls')
+  };
+
+  const factionColors = {
+    britain: '#c41e3a', germany: '#4a4a4a', usa: '#3b5b92', ussr: '#8b0000', japan: '#dcdcdc'
+  };
+
+  const rarityColors = {
+    iron: '#808080', copper: '#b87333', silver: '#c0c0c0', gold: '#d4af37'
+  };
+
+  const unitTypeMap = {
+    infantry: { emoji: '🚶‍♂️', shapeClass: 'half-up' },
+    tank: { emoji: '🚙', shapeClass: 'half-up' },
+    fighter: { emoji: '✈', shapeClass: 'round-up' },
+    bomber: { emoji: '💣', shapeClass: 'round-up' },
+    artillery: { emoji: '🏹', shapeClass: 'round-up' }
+  };
+
+  function updateCardType() {
+    const type = inputEls.type.value;
+    const isUnit = type === 'unit';
+    const isCounter = type === 'counter';
+    
+    displayEls.unitControls.style.display = isUnit ? 'block' : 'none';
+    displayEls.actionDisplay.style.display = isUnit ? 'block' : 'none';
+    
+    displayEls.iconOrder.style.display = (type === 'order') ? 'block' : 'none';
+    displayEls.iconCounter.style.display = isCounter ? 'block' : 'none';
+    displayEls.unitIconArea.style.display = isUnit ? 'flex' : 'none';
+    
+    if (isUnit) {
+      updateUnitType();
+    }
+    updateCard();
+  }
+
+  function updateUnitType() {
+    const unitType = inputEls.unitType.value;
+    const config = unitTypeMap[unitType];
+    
+    displayEls.unitEmoji.innerText = config.emoji;
+    displayEls.attackIcon.className = 'unit-stat ' + config.shapeClass;
+    displayEls.healthIcon.className = 'unit-stat half-down';
+  }
+
+  function updateNation() {
+    displayEls.cardPreview.classList.remove('britain', 'germany', 'usa', 'ussr', 'japan');
+    displayEls.cardPreview.classList.add(inputEls.nation.value);
+    
+    const svgs = document.querySelectorAll('.nation-svg');
+    svgs.forEach(svg => svg.classList.remove('active'));
+    
+    const targetSvg = document.getElementById('svg-' + inputEls.nation.value);
+    if (targetSvg) {
+        targetSvg.classList.add('active');
+    }
+  }
+
+  function updateCard() {
+    displayEls.costDisplay.innerText = inputEls.cost.value;
+    displayEls.actionDisplay.innerText = inputEls.action.value;
+    
+    if (!inputEls.img.value) {
+        displayEls.cardImg.removeAttribute('src');
+    } else {
+        displayEls.cardImg.src = inputEls.img.value;
+    }
+    
+    displayEls.cardName.innerText = inputEls.name.value ? inputEls.name.value.toUpperCase() : "卡名";
+    
+    displayEls.attackIcon.innerText = inputEls.attack.value;
+    displayEls.healthIcon.innerText = inputEls.health.value;
+    
+    const tagValue = inputEls.tag.value;
+    if (tagValue.trim() === '') {
+        displayEls.cardTag.style.display = 'none';
+    } else {
+        displayEls.cardTag.style.display = 'block';
+        displayEls.cardTag.innerText = tagValue;
+    }
+    
+    let textValue = inputEls.text.value;
+    if (!textValue) {
+        textValue = "请输入效果描述...";
+    }
+
+    let escapedText = textValue.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const parts = escapedText.split('$b');
+    let formattedText = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 1) {
+            formattedText += '<b>' + parts[i] + '</b>';
+        } else {
+            formattedText += parts[i];
+        }
+    }
+
+    displayEls.cardText.innerHTML = formattedText;
+
+    let fontSize = 16;
+    const len = textValue.length; 
+    
+    if (len > 120) {
+        fontSize = 8;
+    } else if (len > 80) {
+        fontSize = 10;
+    } else if (len > 50) {
+        fontSize = 12;
+    } else if (len > 25) {
+        fontSize = 14;
+    } else {
+        fontSize = 16;
+    }
+    
+    displayEls.cardText.style.fontSize = fontSize + 'px';
+    displayEls.cardText.style.lineHeight = (fontSize * 1.3) + 'px';
+  }
+
+  function updateRarity() {
+    const rarity = inputEls.rarity.value;
+    const box = displayEls.rarityBox;
+    
+    const starColor = factionColors[inputEls.nation.value];
+    const squareColor = rarityColors[rarity];
+
+    box.innerHTML = '';
+    box.className = 'rarity-box';
+
+    const createSq = (hasStar) => {
+        const sq = document.createElement('div');
+        sq.className = 'rarity-square';
+        sq.style.backgroundColor = squareColor;
+        sq.style.position = 'relative';
+        
+        if (hasStar) {
+            const star = document.createElement('span');
+            star.className = 'rarity-star';
+            star.innerText = '★';
+            star.style.color = starColor;
+            sq.appendChild(star);
+        }
+        return sq;
+    };
+
+    if (rarity === 'iron') {
+        for (let i = 0; i < 4; i++) box.appendChild(createSq(false));
+    } else if (rarity === 'copper') {
+        for (let i = 0; i < 3; i++) box.appendChild(createSq(false));
+    } else if (rarity === 'silver') {
+        box.appendChild(createSq(true));
+        box.appendChild(createSq(true));
+    } else if (rarity === 'gold') {
+        box.appendChild(createSq(true));
+    }
+  }
+
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            displayEls.cardImg.src = e.target.result;
+            inputEls.img.value = '';
+        };
+        reader.readAsDataURL(file);
+    }
+  }
+
+  function exportCard() {
+    const node = displayEls.cardPreview;
+    
+    html2canvas(node, {
+        scale: 3,
+        backgroundColor: null,
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'kards_card.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }).catch(err => {
+        alert("导出失败，请检查图片链接是否有效或是否跨域。错误信息：" + err);
+    });
+  }
+
+  updateNation();
+  updateRarity();
+  updateCardType();
+  updateCard();
+</script>
+
+</body>
+</html>
