@@ -23,6 +23,7 @@
     font-family: 'Arial Black', sans-serif;
   }
 
+  /* 单位卡专属顶部框 */
   #unit-topbar {
     display: none;
     width: 100%;
@@ -139,7 +140,7 @@
     margin: 0 auto; 
   }
 
-  /* 标准Flex布局，完全防止导出裁切 */
+  /* 标准 Flex 布局，防挤压，防裁切 */
   #unit-icon-area {
     display: flex; 
     justify-content: center; 
@@ -171,6 +172,7 @@
     box-sizing: border-box;
   }
 
+  /* ★ 兵种容器，背景色做填充，绝不拉伸图片 ★ */
   #unit-emoji {
     background-color: #3E403B; 
     display: flex; 
@@ -182,10 +184,13 @@
     box-sizing: border-box;
   }
 
+  /* 保持原有比例：宽度/高度为auto，用max限制最大尺寸，多余区域露出背景色 */
   #unit-emoji img { 
-    width: 100%;
-    height: 100%;
-    object-fit: contain; 
+    max-width: 100%; 
+    max-height: 100%; 
+    width: auto;
+    height: auto;
+    object-fit: contain; /* 冗余保险，强制按比例缩放 */
     display: block;
     margin: 0;
   }
@@ -475,25 +480,26 @@
     updateCard();
   }
 
-  // 修复：完全使用 JS 创建元素，避免 HTML 字符串引号冲突
+  // 彻底防挤压：创建 img 元素，强制保持原始比例
   function updateUnitType() {
     const unitType = inputEls.unitType.value;
     const config = unitTypeMap[unitType];
     const customImg = customUnitIcons[unitType];
     const src = customImg || config.img;
 
-    // 清空兵种区域
     displayEls.unitEmoji.innerHTML = '';
     displayEls.unitEmoji.classList.remove('error');
 
-    // 创建 img 元素
     const img = document.createElement('img');
     img.src = src;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
+    
+    // 关键CSS：max宽高+auto，绝对不拉伸变形
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
+    img.style.objectFit = 'contain'; // 保险用，维持比例
 
-    // 绑定加载失败的事件（防止出现乱码文字）
     img.onerror = function() {
         this.style.display = 'none';
         displayEls.unitEmoji.classList.add('error');
