@@ -139,14 +139,14 @@
     margin: 0 auto; 
   }
 
-  /* ★ 彻底取消绝对定位和transform，使用标准Flex布局 ★ */
+  /* 标准Flex布局，完全防止导出裁切 */
   #unit-icon-area {
     display: flex; 
     justify-content: center; 
     align-items: center;
     width: 100%;
     height: 55px; 
-    padding: 0; /* 不加padding，只用margin推 */
+    padding: 0; 
   }
 
   #attack-icon, #health-icon, #unit-emoji {
@@ -155,7 +155,6 @@
     width: 44px;
   }
 
-  /* 攻击力向左推25% */
   #attack-icon {
     margin-left: 25%; 
     background: #111; color: white; font-weight: 900; 
@@ -164,7 +163,6 @@
     box-sizing: border-box;
   }
 
-  /* 防御力向右推25% */
   #health-icon {
     margin-right: 25%; 
     background: #111; color: white; font-weight: 900; 
@@ -173,7 +171,6 @@
     box-sizing: border-box;
   }
 
-  /* 兵种使用普通图片，完全居中，不再受绝对定位影响 */
   #unit-emoji {
     background-color: #3E403B; 
     display: flex; 
@@ -191,6 +188,22 @@
     object-fit: contain; 
     display: block;
     margin: 0;
+  }
+
+  /* 加载失败时的“?”占位符 */
+  #unit-emoji::after {
+    content: '?';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    display: none; 
+  }
+  #unit-emoji.error::after {
+    display: block;
   }
 
   .half-up { border-radius: 50% 50% 0 0; }
@@ -347,7 +360,6 @@
       <div id="icon-order" style="display:flex;">!</div>
       <div id="icon-counter" style="display:none;">?</div>
       
-      <!-- 完全用标准Flex布局排列，导出绝对不会裁切 -->
       <div id="unit-icon-area" style="display:none;">
         <div id="attack-icon" class="unit-stat half-up">2</div>
         <div id="unit-emoji"></div>
@@ -364,9 +376,6 @@
 </div>
 
 <script>
-  // 默认内置一个安全的Base64空白图标，避免本地图片跨域限制
-  const fallbackIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
-
   const inputEls = {
     type: document.getElementById('card-type'),
     nation: document.getElementById('nation'),
@@ -466,15 +475,35 @@
     updateCard();
   }
 
+  // 修复：完全使用 JS 创建元素，避免 HTML 字符串引号冲突
   function updateUnitType() {
     const unitType = inputEls.unitType.value;
     const config = unitTypeMap[unitType];
     const customImg = customUnitIcons[unitType];
-    // 使用默认的Base64安全图标，或用户上传的Base64，否则加载本地文件
     const src = customImg || config.img;
-    
-    displayEls.unitEmoji.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:contain;" onerror="this.src='${fallbackIcon}';">`;
-    
+
+    // 清空兵种区域
+    displayEls.unitEmoji.innerHTML = '';
+    displayEls.unitEmoji.classList.remove('error');
+
+    // 创建 img 元素
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+
+    // 绑定加载失败的事件（防止出现乱码文字）
+    img.onerror = function() {
+        this.style.display = 'none';
+        displayEls.unitEmoji.classList.add('error');
+    };
+    img.onload = function() {
+        displayEls.unitEmoji.classList.remove('error');
+    };
+
+    displayEls.unitEmoji.appendChild(img);
+
     displayEls.attackIcon.className = 'unit-stat ' + config.shapeClass;
     displayEls.healthIcon.className = 'unit-stat half-down';
   }
