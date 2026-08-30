@@ -23,7 +23,6 @@
     font-family: 'Arial Black', sans-serif;
   }
 
-  /* 单位卡专属顶部框 */
   #unit-topbar {
     display: none;
     width: 100%;
@@ -74,7 +73,6 @@
     z-index: 1; 
   }
   
-  /* 阵营背景 */
   .britain { background: #c41e3a; }
   .germany { background: #4a4a4a; }
   .usa { background: #3b5b92; }
@@ -87,7 +85,6 @@
   .australia { background: #00008b; }
   .neutral { background: #dcdcdc; }
   
-  /* 费用黑块 */
   #cost-box { 
     position: absolute; top: 5px; left: 5px; 
     background: #111; color: white; 
@@ -145,7 +142,6 @@
     margin: 0 auto; 
   }
 
-  /* ★ 单位卡布局：攻击力25%，兵种50%，生命值75% ★ */
   #unit-icon-area {
     display: none; 
     position: relative;
@@ -153,16 +149,15 @@
     height: 55px; 
   }
 
-  /* ★ 数值框修改：加宽加大 ★ */
   #unit-icon-area .unit-stat {
     position: absolute;
     top: 0;
     transform: translateX(-50%);
     background: #111; color: white; font-weight: 900; 
-    font-size: 24px; /* 字体变大 */
+    font-size: 24px;
     padding: 0;
-    width: 44px; /* 宽度加大 */
-    height: 44px; /* 高度加大 */
+    width: 44px; 
+    height: 44px; 
     display: flex; justify-content: center; align-items: center;
     box-sizing: border-box;
   }
@@ -170,7 +165,6 @@
   #attack-icon { left: 25%; }
   #health-icon { left: 75%; }
 
-  /* ★ 兵种方块同步改大 ★ */
   #unit-emoji {
     position: absolute;
     top: 0;
@@ -189,15 +183,11 @@
   }
 
   #unit-emoji img { 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     max-width: 100%; 
     max-height: 100%; 
     object-fit: contain; 
-    object-position: center;
     display: block;
+    margin: 0;
   }
 
   #unit-emoji::after {
@@ -326,14 +316,12 @@
   <div id="unit-topbar">
     <div id="unit-card-name">一杯茶</div>
     <div id="unit-nation">
-      <!-- 原有5个 -->
       <svg id="svg-britain-unit" class="nation-svg active" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><circle cx="50" cy="50" r="30" fill="#FFFFFF" /><circle cx="50" cy="50" r="16" fill="#CC0000" /></svg>
       <svg id="svg-germany-unit" class="nation-svg" viewBox="0 0 100 100"><g transform="rotate(45 50 50)"><polygon points="20,20 40,20 50,30 60,20 80,20 80,40 70,50 80,60 80,80 60,80 50,70 40,80 20,80 20,60 30,50 20,40" fill="#000000" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" /></g></svg>
       <svg id="svg-usa-unit" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#FFFFFF" /></svg>
       <svg id="svg-ussr-unit" class="nation-svg" viewBox="0 0 100 100"><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#cc0000" stroke="#d4af37" stroke-width="4" /></svg>
       <svg id="svg-japan-unit" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFFFFF" /><circle cx="50" cy="50" r="30" fill="#cc0000" /></svg>
       
-      <!-- 新增6个 -->
       <svg id="svg-france-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#0055A4"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#EF4135"/></svg>
       <svg id="svg-italy-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#009246"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#CE2B37"/></svg>
       <svg id="svg-poland-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="50" height="50" fill="#DC143C"/><rect x="50" width="50" height="50" fill="#FFFFFF"/><rect y="50" width="50" height="50" fill="#FFFFFF"/><rect x="50" y="50" width="50" height="50" fill="#DC143C"/></svg>
@@ -431,6 +419,7 @@
 
   let customIconData = null;
   let customUnitIcons = {};
+  let currentCardImg = ''; 
 
   const factionColors = {
     britain: '#c41e3a', germany: '#4a4a4a', usa: '#3b5b92', ussr: '#8b0000', japan: '#dcdcdc',
@@ -490,10 +479,9 @@
     const unitType = inputEls.unitType.value;
     const config = unitTypeMap[unitType];
     const customImg = customUnitIcons[unitType];
-    
     const src = customImg || config.img;
     
-    displayEls.unitEmoji.innerHTML = `<img src="${src}" alt="${src}" onerror="this.classList.add('loaded'); this.parentNode.classList.add('error');">`;
+    displayEls.unitEmoji.innerHTML = `<img src="${src}" alt="${src}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
     
     const img = displayEls.unitEmoji.querySelector('img');
     if (img) {
@@ -606,10 +594,12 @@
     displayEls.costDisplay.innerText = inputEls.cost.value;
     displayEls.actionDisplay.innerText = inputEls.action.value;
     
-    if (!inputEls.img.value) {
-        displayEls.cardImg.removeAttribute('src');
-    } else {
+    if (inputEls.img.value) {
         displayEls.cardImg.src = inputEls.img.value;
+    } else if (currentCardImg) {
+        displayEls.cardImg.src = currentCardImg;
+    } else {
+        displayEls.cardImg.removeAttribute('src');
     }
     
     displayEls.cardName.innerText = inputEls.name.value ? inputEls.name.value.toUpperCase() : "卡名";
@@ -696,27 +686,63 @@
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            displayEls.cardImg.src = e.target.result;
+            currentCardImg = e.target.result;
+            displayEls.cardImg.src = currentCardImg;
             inputEls.img.value = '';
         };
         reader.readAsDataURL(file);
     }
   }
 
-  function exportCard() {
+  async function exportCard() {
     const node = displayEls.cardPreview;
+    const allImages = node.querySelectorAll('img');
     
+    // 收集需要处理的非Base64图片
+    let failedImages = [];
+    
+    for (let img of allImages) {
+        // 已经是 Base64 的图片完美支持，跳过
+        if (img.src && img.src.startsWith('data:image/')) continue;
+        
+        // 尝试通过 fetch 获取图片并转成 Base64，解决跨域污染
+        try {
+            const response = await fetch(img.src);
+            const blob = await response.blob();
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            img.src = base64;
+        } catch (e) {
+            // 记录失败图片，不替换透明，避免破坏卡面
+            failedImages.push(img.src);
+            console.warn("图片无法转换为Base64：", img.src);
+        }
+    }
+    
+    // 如果有图片抓取失败，尝试导出并针对可能报错的情况给出明确提示
+    if (failedImages.length > 0) {
+        alert("注意：检测到本地图片（如默认兵种图标）无法直接导出。\n\n解决方法：\n1. 请务必点击“自定义兵种图标”上传该图片（推荐，完美无损）；\n2. 或将本文件放入本地服务器（如VS Code的Live Server）中运行。\n\n现在尝试导出（但可能失败）...");
+    }
+    
+    // 尝试导出
     html2canvas(node, {
         scale: 3,
         backgroundColor: null,
-        useCORS: true
+        useCORS: true,
+        logging: false
     }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'kards_card.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+        
+        // 如果修复了图片，后续点导出就会正常。
     }).catch(err => {
-        alert("导出失败，请检查图片链接是否有效或是否跨域。错误信息：" + err);
+        alert("导出失败：" + err.message + "\n\n请务必点击【自定义兵种图标】上传当前所有兵种图片（上传即变完美），或者使用本地服务器打开页面。");
     });
   }
 
