@@ -23,7 +23,46 @@
     font-family: 'Arial Black', sans-serif;
   }
 
-  /* 图片区域 */
+  /* 单位卡专属顶部框 */
+  #unit-topbar {
+    display: none;
+    width: 100%;
+    height: 45px;
+    background: #000; 
+    position: relative;
+    z-index: 10;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px 0 70px; 
+    box-sizing: border-box;
+  }
+
+  #unit-card-name {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 10px;
+  }
+
+  #unit-nation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 35px;
+  }
+  #unit-nation .nation-svg { width: 35px; height: 35px; display: none; }
+  #unit-nation .nation-svg.active { display: block; }
+
+  .custom-icon-main { width: 45px; height: 45px; display: block; }
+  .custom-icon-unit { width: 35px; height: 35px; display: block; }
+
   #card-img { 
     width: 100%; 
     height: 60%; 
@@ -35,13 +74,20 @@
     z-index: 1; 
   }
   
+  /* 阵营背景 */
   .britain { background: #c41e3a; }
   .germany { background: #4a4a4a; }
   .usa { background: #3b5b92; }
   .ussr { background: #8b0000; }
   .japan { background: #dcdcdc; }
+  .france { background: #0055a4; }
+  .italy { background: #009246; }
+  .poland { background: #dc143c; }
+  .finland { background: #003580; }
+  .australia { background: #00008b; }
+  .neutral { background: #dcdcdc; }
   
-  /* 费用区 */
+  /* 费用黑块 */
   #cost-box { 
     position: absolute; top: 5px; left: 5px; 
     background: #111; color: white; 
@@ -54,7 +100,6 @@
   #cost-stack span.k { color: #d4af37; font-size: 14px; line-height: 12px; font-weight: bold; }
   #action-display { font-size: 12px; line-height: 12px; font-weight: bold; color: white; display: none; }
   
-  /* 阵营图标 */
   #nation-icon { 
     position: absolute; top: 5px; right: 5px; 
     width: 45px; height: 45px; 
@@ -66,7 +111,6 @@
     align-items: center; 
     z-index: 10;
   }
-  
   .nation-svg { width: 45px; height: 45px; display: none; }
   .nation-svg.active { display: block; }
 
@@ -83,18 +127,94 @@
     padding-top: 20px; 
   }
   
-  /* 图标容器：黑方块完美骑在画框底线上 */
   #icon-area { 
-    display: flex; justify-content: center; align-items: center; 
+    display: block; 
+    width: 100%;
     margin: 0 auto; 
-    min-height: 50px; 
-    margin-top: -10px; /* 让黑方块中心对齐底边框线 */
+    min-height: 60px; 
+    margin-top: -10px; 
+    position: relative;
   }
   
-  #icon-order, #icon-counter { background: #111; color: white; font-size: 24px; font-weight: bold; width: 30px; height: 30px; text-align: center; line-height: 30px; }
-  #unit-icon-area { display: flex; justify-content: center; align-items: center; gap: 4px; }
-  #unit-emoji { font-size: 28px; background: #111; color: white; padding: 2px 8px; border-radius: 4px; display: flex; align-items: center; justify-content: center; height: 40px; }
-  .unit-stat { background: #111; color: white; font-weight: 900; font-size: 20px; padding: 5px 10px; width: 30px; height: 40px; display: flex; justify-content: center; align-items: center; }
+  #icon-order, #icon-counter { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    background: #111; color: white; font-size: 24px; font-weight: bold; 
+    width: 30px; height: 30px; 
+    margin: 0 auto; 
+  }
+
+  /* ★ 单位卡布局：攻击力25%，兵种50%，生命值75% ★ */
+  #unit-icon-area {
+    display: none; 
+    position: relative;
+    width: 100%;
+    height: 55px; 
+  }
+
+  /* ★ 数值框修改：加宽加大 ★ */
+  #unit-icon-area .unit-stat {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    background: #111; color: white; font-weight: 900; 
+    font-size: 24px; /* 字体变大 */
+    padding: 0;
+    width: 44px; /* 宽度加大 */
+    height: 44px; /* 高度加大 */
+    display: flex; justify-content: center; align-items: center;
+    box-sizing: border-box;
+  }
+
+  #attack-icon { left: 25%; }
+  #health-icon { left: 75%; }
+
+  /* ★ 兵种方块同步改大 ★ */
+  #unit-emoji {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px; 
+    height: 44px;
+    background-color: #3E403B; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; 
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  #unit-emoji img { 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%; 
+    max-height: 100%; 
+    object-fit: contain; 
+    object-position: center;
+    display: block;
+  }
+
+  #unit-emoji::after {
+    content: '?';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    display: none; 
+  }
+  
+  #unit-emoji.error::after {
+    display: block;
+  }
 
   .half-up { border-radius: 50% 50% 0 0; }
   .half-down { border-radius: 0 0 50% 50%; }
@@ -122,12 +242,18 @@
   </select>
 
   <label>阵营 (Faction)</label>
-  <select id="nation" onchange="updateNation(); updateRarity();">
+  <select id="nation" onchange="updateNation(); updateRarity(); updateUnitTopBarColor();">
     <option value="britain">英国 (Britain)</option>
     <option value="germany">德国 (Germany)</option>
     <option value="usa">美国 (USA)</option>
     <option value="ussr">苏联 (USSR)</option>
     <option value="japan">日本 (Japan)</option>
+    <option value="france">法国 (France)</option>
+    <option value="italy">意大利 (Italy)</option>
+    <option value="poland">波兰 (Poland)</option>
+    <option value="finland">芬兰 (Finland)</option>
+    <option value="australia">澳大利亚 (Australia)</option>
+    <option value="neutral">中立 (Neutral)</option>
   </select>
 
   <label>部署费用 (Cost)</label>
@@ -142,11 +268,11 @@
 
     <label>兵种 (Unit Type)</label>
     <select id="unit-type" onchange="updateUnitType()">
-      <option value="infantry">步兵 🚶‍♂️</option>
-      <option value="tank">坦克 🚙</option>
-      <option value="fighter">战斗机 ✈</option>
-      <option value="bomber">轰炸机 💣</option>
-      <option value="artillery">炮兵 🏹</option>
+      <option value="infantry">步兵 (步兵.jpg)</option>
+      <option value="tank">坦克 (坦克.jpg)</option>
+      <option value="fighter">战斗机 (战斗机.jpg)</option>
+      <option value="bomber">轰炸机 (轰炸机.jpg)</option>
+      <option value="artillery">炮兵 (炮兵.jpg)</option>
     </select>
 
     <label>攻击力 (Attack)</label>
@@ -154,6 +280,13 @@
 
     <label>生命值 (Health)</label>
     <input type="number" id="health" value="3" min="0" max="9" oninput="updateCard()">
+  </div>
+
+  <label>自定义框颜色 (RGB) <br><small>清空输入框则恢复阵营默认色</small></label>
+  <div style="display: flex; gap: 5px;">
+    <input type="number" id="r" min="0" max="255" placeholder="R" style="width: 60px;" oninput="updateUnitTopBarColor()">
+    <input type="number" id="g" min="0" max="255" placeholder="G" style="width: 60px;" oninput="updateUnitTopBarColor()">
+    <input type="number" id="b" min="0" max="255" placeholder="B" style="width: 60px;" oninput="updateUnitTopBarColor()">
   </div>
 
   <label>类型标签 (Tag - 如：闪击，可换行)</label>
@@ -165,9 +298,17 @@
   <label>卡面图片 URL (Image URL)</label>
   <input type="text" id="img" placeholder="https://..." oninput="updateCard()">
   
-  <label>本地导入图片</label>
+  <label>本地导入卡面</label>
   <input type="file" id="imgUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
   <button class="btn" onclick="document.getElementById('imgUpload').click()">选择本地图片</button>
+
+  <label>自定义阵营图标</label>
+  <input type="file" id="iconUpload" accept="image/*" style="display:none;" onchange="handleIconUpload(event)">
+  <button class="btn" onclick="document.getElementById('iconUpload').click()">上传/替换图标</button>
+
+  <label>自定义兵种图标</label>
+  <input type="file" id="unitIconUpload" accept="image/*" style="display:none;" onchange="handleUnitIconUpload(event)">
+  <button class="btn" onclick="document.getElementById('unitIconUpload').click()">上传/替换当前兵种</button>
 
   <label>稀有度 (Rarity)</label>
   <select id="rarity" onchange="updateRarity()">
@@ -181,6 +322,27 @@
 </div>
 
 <div id="card-preview" class="britain">
+  
+  <div id="unit-topbar">
+    <div id="unit-card-name">一杯茶</div>
+    <div id="unit-nation">
+      <!-- 原有5个 -->
+      <svg id="svg-britain-unit" class="nation-svg active" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><circle cx="50" cy="50" r="30" fill="#FFFFFF" /><circle cx="50" cy="50" r="16" fill="#CC0000" /></svg>
+      <svg id="svg-germany-unit" class="nation-svg" viewBox="0 0 100 100"><g transform="rotate(45 50 50)"><polygon points="20,20 40,20 50,30 60,20 80,20 80,40 70,50 80,60 80,80 60,80 50,70 40,80 20,80 20,60 30,50 20,40" fill="#000000" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" /></g></svg>
+      <svg id="svg-usa-unit" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#FFFFFF" /></svg>
+      <svg id="svg-ussr-unit" class="nation-svg" viewBox="0 0 100 100"><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#cc0000" stroke="#d4af37" stroke-width="4" /></svg>
+      <svg id="svg-japan-unit" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFFFFF" /><circle cx="50" cy="50" r="30" fill="#cc0000" /></svg>
+      
+      <!-- 新增6个 -->
+      <svg id="svg-france-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#0055A4"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#EF4135"/></svg>
+      <svg id="svg-italy-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#009246"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#CE2B37"/></svg>
+      <svg id="svg-poland-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="50" height="50" fill="#DC143C"/><rect x="50" width="50" height="50" fill="#FFFFFF"/><rect y="50" width="50" height="50" fill="#FFFFFF"/><rect x="50" y="50" width="50" height="50" fill="#DC143C"/></svg>
+      <svg id="svg-finland-unit" class="nation-svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#FFFFFF"/><rect x="30" width="20" height="100" fill="#003580"/><rect y="30" width="100" height="20" fill="#003580"/></svg>
+      <svg id="svg-australia-unit" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><circle cx="50" cy="50" r="34" fill="#FFFFFF" /></svg>
+      <svg id="svg-neutral-unit" class="nation-svg" viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" fill="#FFFFFF" stroke="#333" stroke-width="2" transform="rotate(45 50 50)"/><rect x="25" y="25" width="50" height="50" fill="#000" transform="rotate(45 50 50)"/></svg>
+    </div>
+  </div>
+
   <div id="cost-box">
     <span id="cost-display">1</span>
     <div id="cost-stack">
@@ -190,37 +352,29 @@
   </div>
   
   <div id="nation-icon">
-    <svg id="svg-britain" class="nation-svg active" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="#003399" />
-      <circle cx="50" cy="50" r="30" fill="#FFFFFF" />
-      <circle cx="50" cy="50" r="16" fill="#CC0000" />
-    </svg>
-    <svg id="svg-germany" class="nation-svg" viewBox="0 0 100 100">
-      <g transform="rotate(45 50 50)">
-        <polygon points="20,20 40,20 50,30 60,20 80,20 80,40 70,50 80,60 80,80 60,80 50,70 40,80 20,80 20,60 30,50 20,40" fill="#000000" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" />
-      </g>
-    </svg>
-    <svg id="svg-usa" class="nation-svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="#003399" />
-      <polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#FFFFFF" />
-    </svg>
-    <svg id="svg-ussr" class="nation-svg" viewBox="0 0 100 100">
-      <polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#cc0000" stroke="#d4af37" stroke-width="4" />
-    </svg>
-    <svg id="svg-japan" class="nation-svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="#FFFFFF" />
-      <circle cx="50" cy="50" r="30" fill="#cc0000" />
-    </svg>
+    <svg id="svg-britain" class="nation-svg active" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><circle cx="50" cy="50" r="30" fill="#FFFFFF" /><circle cx="50" cy="50" r="16" fill="#CC0000" /></svg>
+    <svg id="svg-germany" class="nation-svg" viewBox="0 0 100 100"><g transform="rotate(45 50 50)"><polygon points="20,20 40,20 50,30 60,20 80,20 80,40 70,50 80,60 80,80 60,80 50,70 40,80 20,80 20,60 30,50 20,40" fill="#000000" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" /></g></svg>
+    <svg id="svg-usa" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#FFFFFF" /></svg>
+    <svg id="svg-ussr" class="nation-svg" viewBox="0 0 100 100"><polygon points="50,15 58,38 82,38 63,52 69,75 50,60 31,75 37,52 18,38 42,38" fill="#cc0000" stroke="#d4af37" stroke-width="4" /></svg>
+    <svg id="svg-japan" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFFFFF" /><circle cx="50" cy="50" r="30" fill="#cc0000" /></svg>
+
+    <svg id="svg-france" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#0055A4"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#EF4135"/></svg>
+    <svg id="svg-italy" class="nation-svg" viewBox="0 0 100 100"><rect width="33" height="100" fill="#009246"/><rect x="33" width="34" height="100" fill="#FFFFFF"/><rect x="67" width="33" height="100" fill="#CE2B37"/></svg>
+    <svg id="svg-poland" class="nation-svg" viewBox="0 0 100 100"><rect width="50" height="50" fill="#DC143C"/><rect x="50" width="50" height="50" fill="#FFFFFF"/><rect y="50" width="50" height="50" fill="#FFFFFF"/><rect x="50" y="50" width="50" height="50" fill="#DC143C"/></svg>
+    <svg id="svg-finland" class="nation-svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#FFFFFF"/><rect x="30" width="20" height="100" fill="#003580"/><rect y="30" width="100" height="20" fill="#003580"/></svg>
+    <svg id="svg-australia" class="nation-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#003399" /><circle cx="50" cy="50" r="34" fill="#FFFFFF" /></svg>
+    <svg id="svg-neutral" class="nation-svg" viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" fill="#FFFFFF" stroke="#333" stroke-width="2" transform="rotate(45 50 50)"/><rect x="25" y="25" width="50" height="50" fill="#000" transform="rotate(45 50 50)"/></svg>
   </div>
 
   <img id="card-img" src="" alt="卡面">
   <div id="text-area">
     <div id="icon-area">
-      <div id="icon-order" style="display:block;">!</div>
+      <div id="icon-order" style="display:flex;">!</div>
       <div id="icon-counter" style="display:none;">?</div>
+      
       <div id="unit-icon-area" style="display:none;">
         <div id="attack-icon" class="unit-stat half-up">2</div>
-        <div id="unit-emoji">🚶‍♂️</div>
+        <div id="unit-emoji"></div>
         <div id="health-icon" class="unit-stat half-down">2</div>
       </div>
     </div>
@@ -246,13 +400,21 @@
     tag: document.getElementById('tag'),
     text: document.getElementById('text'),
     img: document.getElementById('img'),
-    rarity: document.getElementById('rarity')
+    rarity: document.getElementById('rarity'),
+    r: document.getElementById('r'),
+    g: document.getElementById('g'),
+    b: document.getElementById('b')
   };
 
   const displayEls = {
     cardPreview: document.getElementById('card-preview'),
     costDisplay: document.getElementById('cost-display'),
     actionDisplay: document.getElementById('action-display'),
+    costBox: document.getElementById('cost-box'),
+    nationIcon: document.getElementById('nation-icon'),
+    unitTopbar: document.getElementById('unit-topbar'),
+    unitCardName: document.getElementById('unit-card-name'),
+    unitNation: document.getElementById('unit-nation'),
     cardImg: document.getElementById('card-img'),
     cardName: document.getElementById('card-name'),
     cardTag: document.getElementById('card-tag'),
@@ -267,8 +429,18 @@
     unitControls: document.getElementById('unit-controls')
   };
 
+  let customIconData = null;
+  let customUnitIcons = {};
+
   const factionColors = {
-    britain: '#c41e3a', germany: '#4a4a4a', usa: '#3b5b92', ussr: '#8b0000', japan: '#dcdcdc'
+    britain: '#c41e3a', germany: '#4a4a4a', usa: '#3b5b92', ussr: '#8b0000', japan: '#dcdcdc',
+    france: '#0055a4', italy: '#009246', poland: '#dc143c', finland: '#003580', australia: '#00008b', neutral: '#dcdcdc'
+  };
+
+  const factionTopBarColors = {
+    ussr: '#584631', japan: '#967233', britain: '#93825C', usa: '#5A5D3A',
+    germany: '#5B6358', france: '#444B62', italy: '#605C52', finland: '#B3AD95',
+    australia: '#744C21', poland: '#5F5640', neutral: '#404040'
   };
 
   const rarityColors = {
@@ -276,11 +448,11 @@
   };
 
   const unitTypeMap = {
-    infantry: { emoji: '🚶‍♂️', shapeClass: 'half-up' },
-    tank: { emoji: '🚙', shapeClass: 'half-up' },
-    fighter: { emoji: '✈', shapeClass: 'round-up' },
-    bomber: { emoji: '💣', shapeClass: 'round-up' },
-    artillery: { emoji: '🏹', shapeClass: 'round-up' }
+    infantry: { img: '步兵.jpg', shapeClass: 'half-up' },
+    tank: { img: '坦克.jpg', shapeClass: 'half-up' },
+    fighter: { img: '战斗机.jpg', shapeClass: 'round-up' },
+    bomber: { img: '轰炸机.jpg', shapeClass: 'round-up' },
+    artillery: { img: '炮兵.jpg', shapeClass: 'round-up' }
   };
 
   function updateCardType() {
@@ -289,14 +461,27 @@
     const isCounter = type === 'counter';
     
     displayEls.unitControls.style.display = isUnit ? 'block' : 'none';
+    displayEls.unitTopbar.style.display = isUnit ? 'flex' : 'none';
+    displayEls.nationIcon.style.display = isUnit ? 'none' : 'flex';
+
+    displayEls.costBox.style.display = 'flex';
+    displayEls.costBox.style.top = isUnit ? '0px' : '5px';
+    displayEls.costBox.style.left = isUnit ? '0px' : '5px';
+    displayEls.costBox.style.zIndex = isUnit ? '20' : '10';
+
+    displayEls.unitCardName.style.display = isUnit ? 'block' : 'none';
+    displayEls.cardName.style.display = isUnit ? 'none' : 'block';
+
+    displayEls.iconOrder.style.display = (type === 'order') ? 'flex' : 'none';
+    displayEls.iconCounter.style.display = isCounter ? 'flex' : 'none';
+    displayEls.unitIconArea.style.display = isUnit ? 'block' : 'none';
+    
+    displayEls.cardImg.style.height = isUnit ? '55%' : '60%';
     displayEls.actionDisplay.style.display = isUnit ? 'block' : 'none';
-    
-    displayEls.iconOrder.style.display = (type === 'order') ? 'block' : 'none';
-    displayEls.iconCounter.style.display = isCounter ? 'block' : 'none';
-    displayEls.unitIconArea.style.display = isUnit ? 'flex' : 'none';
-    
+
     if (isUnit) {
       updateUnitType();
+      updateUnitTopBarColor(); 
     }
     updateCard();
   }
@@ -304,23 +489,117 @@
   function updateUnitType() {
     const unitType = inputEls.unitType.value;
     const config = unitTypeMap[unitType];
+    const customImg = customUnitIcons[unitType];
     
-    displayEls.unitEmoji.innerText = config.emoji;
+    const src = customImg || config.img;
+    
+    displayEls.unitEmoji.innerHTML = `<img src="${src}" alt="${src}" onerror="this.classList.add('loaded'); this.parentNode.classList.add('error');">`;
+    
+    const img = displayEls.unitEmoji.querySelector('img');
+    if (img) {
+        img.onload = () => {
+            displayEls.unitEmoji.classList.remove('error');
+        };
+        img.onerror = () => {
+            displayEls.unitEmoji.classList.add('error');
+            img.style.display = 'none';
+        };
+    }
+    
     displayEls.attackIcon.className = 'unit-stat ' + config.shapeClass;
     displayEls.healthIcon.className = 'unit-stat half-down';
   }
 
-  function updateNation() {
-    displayEls.cardPreview.classList.remove('britain', 'germany', 'usa', 'ussr', 'japan');
-    displayEls.cardPreview.classList.add(inputEls.nation.value);
-    
-    const svgs = document.querySelectorAll('.nation-svg');
-    svgs.forEach(svg => svg.classList.remove('active'));
-    
-    const targetSvg = document.getElementById('svg-' + inputEls.nation.value);
-    if (targetSvg) {
-        targetSvg.classList.add('active');
+  function handleIconUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            customIconData = e.target.result;
+            updateNation();
+        };
+        reader.readAsDataURL(file);
     }
+  }
+
+  function handleUnitIconUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            customUnitIcons[inputEls.unitType.value] = e.target.result;
+            updateUnitType();
+        };
+        reader.readAsDataURL(file);
+    }
+  }
+
+  function updateUnitTopBarColor() {
+    const r = inputEls.r.value;
+    const g = inputEls.g.value;
+    const b = inputEls.b.value;
+
+    let color = '#000'; 
+
+    if (r !== '' && g !== '' && b !== '') {
+        color = `rgb(${r}, ${g}, ${b})`;
+    } else {
+        color = factionTopBarColors[inputEls.nation.value] || '#000';
+    }
+    
+    displayEls.unitTopbar.style.backgroundColor = color;
+  }
+
+  function updateNation() {
+    displayEls.cardPreview.classList.remove('britain', 'germany', 'usa', 'ussr', 'japan', 'france', 'italy', 'poland', 'finland', 'australia', 'neutral');
+    displayEls.cardPreview.classList.add(inputEls.nation.value);
+
+    const iconArea = document.getElementById('nation-icon');
+    const unitIconArea = document.getElementById('unit-nation');
+
+    if (customIconData) {
+        iconArea.querySelectorAll('.nation-svg').forEach(svg => svg.style.display = 'none');
+        unitIconArea.querySelectorAll('.nation-svg').forEach(svg => svg.style.display = 'none');
+
+        let customMain = document.getElementById('custom-icon-main');
+        if (!customMain) {
+            customMain = document.createElement('img');
+            customMain.id = 'custom-icon-main';
+            customMain.className = 'custom-icon-main';
+            iconArea.appendChild(customMain);
+        }
+        customMain.src = customIconData;
+        customMain.style.display = 'block';
+
+        let customUnit = document.getElementById('custom-icon-unit');
+        if (!customUnit) {
+            customUnit = document.createElement('img');
+            customUnit.id = 'custom-icon-unit';
+            customUnit.className = 'custom-icon-unit';
+            unitIconArea.appendChild(customUnit);
+        }
+        customUnit.src = customIconData;
+        customUnit.style.display = 'block';
+
+    } else {
+        const customMain = document.getElementById('custom-icon-main');
+        const customUnit = document.getElementById('custom-icon-unit');
+        if (customMain) customMain.style.display = 'none';
+        if (customUnit) customUnit.style.display = 'none';
+
+        iconArea.querySelectorAll('.nation-svg').forEach(svg => svg.style.display = '');
+        unitIconArea.querySelectorAll('.nation-svg').forEach(svg => svg.style.display = '');
+
+        iconArea.querySelectorAll('.nation-svg').forEach(svg => svg.classList.remove('active'));
+        const targetSvg = document.getElementById('svg-' + inputEls.nation.value);
+        if (targetSvg) targetSvg.classList.add('active');
+
+        unitIconArea.querySelectorAll('.nation-svg').forEach(svg => svg.classList.remove('active'));
+        const targetUnitSvg = document.getElementById('svg-' + inputEls.nation.value + '-unit');
+        if (targetUnitSvg) targetUnitSvg.classList.add('active');
+    }
+
+    updateUnitTopBarColor();
   }
 
   function updateCard() {
@@ -334,6 +613,7 @@
     }
     
     displayEls.cardName.innerText = inputEls.name.value ? inputEls.name.value.toUpperCase() : "卡名";
+    displayEls.unitCardName.innerText = inputEls.name.value ? inputEls.name.value.toUpperCase() : "卡名";
     
     displayEls.attackIcon.innerText = inputEls.attack.value;
     displayEls.healthIcon.innerText = inputEls.health.value;
@@ -347,20 +627,15 @@
     }
     
     let textValue = inputEls.text.value;
-    if (!textValue) {
-        textValue = "请输入效果描述...";
-    }
+    if (!textValue) textValue = "请输入效果描述...";
 
     let escapedText = textValue.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const parts = escapedText.split('$b');
     let formattedText = '';
     
     for (let i = 0; i < parts.length; i++) {
-        if (i % 2 === 1) {
-            formattedText += '<b>' + parts[i] + '</b>';
-        } else {
-            formattedText += parts[i];
-        }
+        if (i % 2 === 1) formattedText += '<b>' + parts[i] + '</b>';
+        else formattedText += parts[i];
     }
 
     displayEls.cardText.innerHTML = formattedText;
@@ -368,17 +643,11 @@
     let fontSize = 16;
     const len = textValue.length; 
     
-    if (len > 120) {
-        fontSize = 8;
-    } else if (len > 80) {
-        fontSize = 10;
-    } else if (len > 50) {
-        fontSize = 12;
-    } else if (len > 25) {
-        fontSize = 14;
-    } else {
-        fontSize = 16;
-    }
+    if (len > 120) fontSize = 8;
+    else if (len > 80) fontSize = 10;
+    else if (len > 50) fontSize = 12;
+    else if (len > 25) fontSize = 14;
+    else fontSize = 16;
     
     displayEls.cardText.style.fontSize = fontSize + 'px';
     displayEls.cardText.style.lineHeight = (fontSize * 1.3) + 'px';
